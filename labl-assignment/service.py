@@ -1,28 +1,21 @@
-﻿import socket
+﻿import asyncio
 import time
-from datetime import datetime, timezone
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 
-app = FastAPI(title="Lab 1 & Assignment 1 Service")
-START_TIME = time.monotonic()
+app = FastAPI()
+START_TIME = time.time()
 
 
 @app.get("/info")
-def info(delay: float = 0.0):
-    if delay > 0:
-        time.sleep(delay)
-    return {
-        "host": socket.gethostname(),
-        "server_time": datetime.now(timezone.utc).isoformat(),
-    }
+def info():
+    return {"service": "health-demo", "status": "running"}
 
 
 @app.get("/health")
-def health(delay: float = 0.0):
+async def health(delay: float = Query(default=0.0, ge=0.0)):
     if delay > 0:
-        time.sleep(delay)
-    uptime_seconds = round(time.monotonic() - START_TIME, 2)
+        await asyncio.sleep(delay)
     return {
         "status": "ok",
-        "uptime_seconds": uptime_seconds,
+        "uptime_seconds": round(time.time() - START_TIME, 2),
     }
